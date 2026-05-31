@@ -17,6 +17,7 @@ export interface ArkhamPack {
   code: string;
   name: string;
   cycle_code: string;
+  cycle_position: number;
   position: number;
 }
 
@@ -32,6 +33,7 @@ export const CYCLE_POSITION_TO_CODE: Record<number, string> = {
   9:  'tsk',
   10: 'fhv',
   11: 'tdc',
+  50: 'rtt',
 };
 
 export const CYCLE_PREFIX_MAP: Record<string, string> = {
@@ -46,6 +48,40 @@ export const CYCLE_PREFIX_MAP: Record<string, string> = {
   tsk:  '09',
   fhv:  '10',
   tdc:  '11',
+};
+
+export const CAMPAIGN_PACK_CODES = new Set([
+  'core',  'rcore',
+  'dwl',
+  'ptc',
+  'tfa',
+  'tcu',
+  'tde',
+  'tic',
+  'eoec',
+  'tskc',
+  'fhvc',
+  'tdcc',
+  'rtnotz',
+  'rtdwl',
+  'rtptc',
+  'rttfa',
+  'rttcu',
+]);
+
+export function packPrefix(pack: ArkhamPack): string | undefined {
+  if (pack.cycle_code === 'rtt') {
+    return String(pack.cycle_position + pack.position - 1).padStart(2, '0');
+  }
+  return CYCLE_PREFIX_MAP[pack.cycle_code];
+}
+
+export const RETURN_TO_PARENT_CYCLE: Record<string, string> = {
+  rtnotz: 'core',
+  rtdwl:  'dwl',
+  rtptc:  'ptc',
+  rttfa:  'tfa',
+  rttcu:  'tcu',
 };
 
 export const CYCLE_DISPLAY_NAMES: Record<string, string> = {

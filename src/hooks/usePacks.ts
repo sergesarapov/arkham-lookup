@@ -30,6 +30,7 @@ export function usePacks(): UsePacksReturn {
           code: p.code,
           name: p.name,
           position: p.position,
+          cycle_position: p.cycle_position,
           cycle_code: CYCLE_POSITION_TO_CODE[p.cycle_position] ?? `cycle_${p.cycle_position}`,
         }));
         const sorted = [...data].sort((a, b) => {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ArkhamPack } from './types/arkhamdb';
-import { CYCLE_PREFIX_MAP } from './types/arkhamdb';
+import { packPrefix } from './types/arkhamdb';
 import { usePacks } from './hooks/usePacks';
 import { useArkhamDB } from './hooks/useArkhamDB';
 import { PackSelector } from './components/PackSelector';
@@ -53,7 +53,7 @@ function App() {
     e.preventDefault();
     if (!selectedPack) return;
 
-    const prefix = CYCLE_PREFIX_MAP[selectedPack.cycle_code];
+    const prefix = packPrefix(selectedPack);
     if (!prefix) {
       setInputError('This set is not supported yet.');
       return;
