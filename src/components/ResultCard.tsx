@@ -1,14 +1,13 @@
-import type { ArkhamCard } from '../types/arkhamdb';
-
-type Side = 'a' | 'b' | null;
+import type { ArkhamCard, Side } from '../types/arkhamdb';
 
 interface ResultCardProps {
   card: ArkhamCard;
   side: Side;
+  isSidedFallback?: boolean;
   onDismiss: () => void;
 }
 
-export function ResultCard({ card, side, onDismiss }: ResultCardProps) {
+export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCardProps) {
   const hasBack = card.double_sided && card.back_text;
   const showFront = !hasBack || side !== 'b';
   const showBack = !!hasBack && (side === 'b' || side === null);
@@ -54,6 +53,12 @@ export function ResultCard({ card, side, onDismiss }: ResultCardProps) {
           <span className="text-arkham-muted">{card.pack_name}</span>
           <span className="text-arkham-muted font-mono">{card.code}</span>
         </div>
+
+        {isSidedFallback && (
+          <p className="text-xs font-sans text-arkham-burgundy mb-3">
+            This card has multiple sides — showing side A. Add a, b, c… to look up a specific side.
+          </p>
+        )}
 
         <hr className="border-arkham-border mb-3" />
 

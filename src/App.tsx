@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ArkhamPack } from './types/arkhamdb';
-import { packPrefix } from './types/arkhamdb';
+import { packPrefix, packCardOffset } from './types/arkhamdb';
+import type { Side } from './types/arkhamdb';
 import { usePacks } from './hooks/usePacks';
 import { useArkhamDB } from './hooks/useArkhamDB';
 import { PackSelector } from './components/PackSelector';
@@ -8,23 +9,21 @@ import { ResultCard } from './components/ResultCard';
 
 const PACK_KEY = 'arkham-lens-pack';
 
-type Side = 'a' | 'b' | null;
-
-function parseCardInput(cyclePrefix: string, raw: string): { code: string; side: Side } | null {
-  const m = raw.trim().match(/^(\d{1,3})([ab]?)$/i);
+function parseCardInput(cyclePrefix: string, raw: string, offset = 0): { code: string; side: Side } | null {
+  const m = raw.trim().match(/^(\d{1,3})([a-z]?)$/i);
   if (!m) return null;
   const n = parseInt(m[1] ?? '', 10);
   if (!n || n < 1 || n > 999) return null;
   const letter = (m[2] ?? '').toLowerCase();
   return {
-    code: cyclePrefix + String(n).padStart(3, '0'),
-    side: letter === 'a' ? 'a' : letter === 'b' ? 'b' : null,
+    code: cyclePrefix + String(n + offset).padStart(3, '0'),
+    side: letter || null,
   };
 }
 
 function App() {
   const { packs, isLoading: packsLoading } = usePacks();
-  const { card, fetchCard, reset: resetCard, error: cardError } = useArkhamDB();
+  const { card, fetchCard, reset: resetCard, error: cardError, usedFallback } = useArkhamDB();
 
   const [selectedPack, setSelectedPack] = useState<ArkhamPack | null>(null);
   const [number, setNumber] = useState('');
@@ -59,7 +58,7 @@ function App() {
       return;
     }
 
-    const parsed = parseCardInput(prefix, number);
+    const parsed = parseCardInput(prefix, number, packCardOffset(selectedPack));
     if (!parsed) {
       setInputError('Enter a number like 36 or 41b.');
       return;
@@ -70,7 +69,7 @@ function App() {
     setFetching(true);
     resetCard();
     const primaryCode = parsed.side ? parsed.code + parsed.side : parsed.code;
-    const fallbackCode = parsed.side ? parsed.code : undefined;
+    const fallbackCode = parsed.side ? parsed.code : parsed.code + 'a';
     await fetchCard(primaryCode, fallbackCode);
     setFetching(false);
   };
@@ -137,7 +136,7 @@ function App() {
         )}
       </div>
 
-      {card && <ResultCard card={card} side={selectedSide} onDismiss={dismiss} />}
+      {card && <ResultCard card={card} side={selectedSide} isSidedFallback={usedFallback && !selectedSide} onDismiss={dismiss} />}
     </div>
   );
 }

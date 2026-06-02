@@ -13,6 +13,7 @@ export default {
           cream: '#e8d9b0',
           muted: '#8a7a5a',
           danger: '#8b2020',
+          burgundy: '#7b2d42',
         },
       },
       fontFamily: {

@@ -1,3 +1,5 @@
+export type Side = string | null;
+
 export interface ArkhamCard {
   code: string;
   name: string;
@@ -74,6 +76,13 @@ export function packPrefix(pack: ArkhamPack): string | undefined {
     return String(pack.cycle_position + pack.position - 1).padStart(2, '0');
   }
   return CYCLE_PREFIX_MAP[pack.cycle_code];
+}
+
+// Campaign expansions for split-box cycles start their card codes at 501, not 001.
+const CAMPAIGN_EXPANSION_CODES = new Set(['eoec', 'tskc', 'fhvc', 'tdcc']);
+
+export function packCardOffset(pack: ArkhamPack): number {
+  return CAMPAIGN_EXPANSION_CODES.has(pack.code) ? 500 : 0;
 }
 
 export const RETURN_TO_PARENT_CYCLE: Record<string, string> = {
