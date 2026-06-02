@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import type { ArkhamCard, Side } from '../types/arkhamdb';
 
 interface ResultCardProps {
@@ -13,14 +14,48 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
   const showBack = !!hasBack && (side === 'b' || side === null);
   const backName = card.back_name ?? card.name;
 
+  const [dragY, setDragY] = useState(0);
+  const dragging = useRef(false);
+  const startY = useRef(0);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragging.current = true;
+    startY.current = e.clientY;
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragging.current) return;
+    setDragY(Math.max(0, e.clientY - startY.current));
+  };
+
+  const onPointerUp = () => {
+    dragging.current = false;
+    if (dragY > 80) {
+      onDismiss();
+    } else {
+      setDragY(0);
+    }
+  };
+
   return (
     <div
       className="absolute inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl card-texture border-t border-arkham-border shadow-2xl animate-slide-up overflow-hidden flex flex-col"
       role="dialog"
       aria-label={`Card: ${card.name}`}
+      style={{
+        transform: `translateY(${dragY}px)`,
+        transition: dragging.current ? 'none' : 'transform 0.25s ease-out',
+      }}
     >
       {/* Drag handle */}
-      <div className="flex justify-center pt-2 pb-1 shrink-0">
+      <div
+        className="flex justify-center pt-2 pb-1 shrink-0 cursor-grab active:cursor-grabbing touch-none"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      >
         <div className="w-10 h-1 rounded-full bg-arkham-border" />
       </div>
 
