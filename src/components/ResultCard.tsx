@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ArkhamCard, Side } from '../types/arkhamdb';
 
 interface ResultCardProps {
@@ -14,6 +15,7 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
   const showBack = !!hasBack && (side === 'b' || side === null);
   const backName = card.back_name ?? card.name;
 
+  const [modalImage, setModalImage] = useState<string | null>(null);
   const [dragY, setDragY] = useState(0);
   const dragging = useRef(false);
   const startY = useRef(0);
@@ -39,6 +41,7 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
   };
 
   return (
+    <>
     <div
       className="absolute inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl card-texture border-t border-arkham-border shadow-2xl animate-slide-up overflow-hidden flex flex-col"
       role="dialog"
@@ -80,62 +83,102 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
           </button>
         </div>
 
-        {/* Meta */}
-        <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-3 text-xs font-sans">
-          {card.traits && (
-            <span className="text-arkham-gold italic">{card.traits}</span>
+        <div className="flex gap-4 items-start">
+          <div className="flex-1 min-w-0">
+            {/* Meta */}
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-3 text-xs font-sans">
+              {card.traits && (
+                <span className="text-arkham-gold italic">{card.traits}</span>
+              )}
+              <span className="text-arkham-muted">{card.pack_name}</span>
+              <span className="text-arkham-muted font-mono">{card.code}</span>
+            </div>
+
+            {isSidedFallback && (
+              <p className="text-xs font-sans text-arkham-burgundy mb-3">
+                This card has multiple sides — showing side A. Add a, b, c… to look up a specific side.
+              </p>
+            )}
+
+            <hr className="border-arkham-border mb-3" />
+
+            {/* Front side */}
+            {showFront && card.text && (
+              <>
+                {hasBack && side === null && (
+                  <p className="text-xs font-sans uppercase tracking-widest text-arkham-muted mb-1">Front</p>
+                )}
+                <div
+                  className="text-sm font-sans text-arkham-cream leading-relaxed whitespace-pre-wrap mb-3"
+                  dangerouslySetInnerHTML={{ __html: card.text }}
+                />
+                {card.flavor && side !== 'b' && (
+                  <p className="text-xs font-serif italic text-arkham-muted leading-relaxed border-t border-arkham-border pt-3 mb-3">
+                    {card.flavor.replace(/<[^>]+>/g, '')}
+                  </p>
+                )}
+              </>
+            )}
+
+            {/* Back side */}
+            {showBack && card.back_text && (
+              <>
+                {side === null && (
+                  <hr className="border-arkham-border mb-3" />
+                )}
+                {hasBack && side === null && (
+                  <p className="text-xs font-sans uppercase tracking-widest text-arkham-muted mb-1">Back</p>
+                )}
+                <div
+                  className="text-sm font-sans text-arkham-cream leading-relaxed whitespace-pre-wrap mb-3"
+                  dangerouslySetInnerHTML={{ __html: card.back_text }}
+                />
+                {card.back_flavor && (
+                  <p className="text-xs font-serif italic text-arkham-muted leading-relaxed border-t border-arkham-border pt-3">
+                    {card.back_flavor.replace(/<[^>]+>/g, '')}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+          {(card.imagesrc || card.backimagesrc) && (
+            <div className="shrink-0 flex flex-col gap-2">
+              {card.imagesrc && (
+                <img
+                  src={`https://arkhamdb.com${card.imagesrc}`}
+                  alt={card.name}
+                  className="w-32 rounded-lg shadow-lg cursor-zoom-in"
+                  onClick={() => setModalImage(`https://arkhamdb.com${card.imagesrc}`)}
+                />
+              )}
+              {card.backimagesrc && (
+                <img
+                  src={`https://arkhamdb.com${card.backimagesrc}`}
+                  alt={`${card.name} (back)`}
+                  className="w-32 rounded-lg shadow-lg cursor-zoom-in"
+                  onClick={() => setModalImage(`https://arkhamdb.com${card.backimagesrc}`)}
+                />
+              )}
+            </div>
           )}
-          <span className="text-arkham-muted">{card.pack_name}</span>
-          <span className="text-arkham-muted font-mono">{card.code}</span>
         </div>
-
-        {isSidedFallback && (
-          <p className="text-xs font-sans text-arkham-burgundy mb-3">
-            This card has multiple sides — showing side A. Add a, b, c… to look up a specific side.
-          </p>
-        )}
-
-        <hr className="border-arkham-border mb-3" />
-
-        {/* Front side */}
-        {showFront && card.text && (
-          <>
-            {hasBack && side === null && (
-              <p className="text-xs font-sans uppercase tracking-widest text-arkham-muted mb-1">Front</p>
-            )}
-            <div
-              className="text-sm font-sans text-arkham-cream leading-relaxed whitespace-pre-wrap mb-3"
-              dangerouslySetInnerHTML={{ __html: card.text }}
-            />
-            {card.flavor && side !== 'b' && (
-              <p className="text-xs font-serif italic text-arkham-muted leading-relaxed border-t border-arkham-border pt-3 mb-3">
-                {card.flavor.replace(/<[^>]+>/g, '')}
-              </p>
-            )}
-          </>
-        )}
-
-        {/* Back side */}
-        {showBack && card.back_text && (
-          <>
-            {side === null && (
-              <hr className="border-arkham-border mb-3" />
-            )}
-            {hasBack && side === null && (
-              <p className="text-xs font-sans uppercase tracking-widest text-arkham-muted mb-1">Back</p>
-            )}
-            <div
-              className="text-sm font-sans text-arkham-cream leading-relaxed whitespace-pre-wrap mb-3"
-              dangerouslySetInnerHTML={{ __html: card.back_text }}
-            />
-            {card.back_flavor && (
-              <p className="text-xs font-serif italic text-arkham-muted leading-relaxed border-t border-arkham-border pt-3">
-                {card.back_flavor.replace(/<[^>]+>/g, '')}
-              </p>
-            )}
-          </>
-        )}
       </div>
     </div>
+
+    {modalImage && createPortal(
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+        onClick={() => setModalImage(null)}
+      >
+        <img
+          src={modalImage}
+          alt={card.name}
+          className="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        />
+      </div>,
+      document.body,
+    )}
+    </>
   );
 }

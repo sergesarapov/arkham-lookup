@@ -9,6 +9,8 @@ export interface ArkhamCard {
   flavor: string | null;
   pack_name: string;
   faction_name: string;
+  imagesrc?: string | null;
+  backimagesrc?: string | null;
   double_sided?: boolean;
   back_name?: string | null;
   back_text?: string | null;
