@@ -52,16 +52,24 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
       }}
     >
       {/* Drag handle */}
-      <div
-        className="flex justify-center items-center py-6 shrink-0 cursor-grab active:cursor-grabbing touch-none"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
-        <div className="w-10 h-1 rounded-full bg-arkham-border" />
+      <div className="relative flex items-center justify-center w-full py-6">
+        <div
+          className="absolute inset-0 flex justify-center items-center cursor-grab active:cursor-grabbing touch-none"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+        >
+          <div className="w-10 h-1 rounded-full bg-arkham-border" />
+        </div>
+        <button
+          onClick={onDismiss}
+          className="absolute right-4 top-1/2 -translate-y-1/2 shrink-0 text-arkham-muted hover:text-arkham-cream transition-colors text-xl leading-none p-1"
+          aria-label="Dismiss"
+        >
+          ×
+        </button>
       </div>
-
       <div className="overflow-y-auto px-5 pb-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-2 mb-3 mt-1">
@@ -74,13 +82,6 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
               {card.faction_name ? ` · ${card.faction_name}` : ''}
             </p>
           </div>
-          <button
-            onClick={onDismiss}
-            className="shrink-0 text-arkham-muted hover:text-arkham-cream transition-colors text-xl leading-none p-1"
-            aria-label="Dismiss"
-          >
-            ×
-          </button>
         </div>
 
         <div className="flex gap-4 items-start">
