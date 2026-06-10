@@ -53,7 +53,7 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
     >
       {/* Drag handle */}
       <div
-        className="flex justify-center pt-2 pb-1 shrink-0 cursor-grab active:cursor-grabbing touch-none"
+        className="flex justify-center items-center py-6 shrink-0 cursor-grab active:cursor-grabbing touch-none"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
