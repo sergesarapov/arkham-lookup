@@ -3,12 +3,18 @@ import type { ArkhamCard } from '../types/arkhamdb';
 
 type CardError = 'not-found' | 'network' | null;
 
+interface FetchResult {
+  card: ArkhamCard;
+  usedFallback: boolean;
+}
+
 interface UseArkhamDBReturn {
   card: ArkhamCard | null;
   isLoading: boolean;
   error: CardError;
   usedFallback: boolean;
-  fetchCard: (code: string, fallback?: string) => Promise<void>;
+  fetchCard: (code: string, fallback?: string) => Promise<FetchResult | null>;
+  selectCard: (card: ArkhamCard, usedFallback: boolean) => void;
   reset: () => void;
 }
 
@@ -18,7 +24,7 @@ export function useArkhamDB(): UseArkhamDBReturn {
   const [error, setError] = useState<CardError>(null);
   const [usedFallback, setUsedFallback] = useState(false);
 
-  const fetchCard = async (code: string, fallback?: string): Promise<void> => {
+  const fetchCard = async (code: string, fallback?: string): Promise<FetchResult | null> => {
     setIsLoading(true);
     setError(null);
     setCard(null);
@@ -35,14 +41,27 @@ export function useArkhamDB(): UseArkhamDBReturn {
       };
 
       const primary = await tryFetch(code);
-      if (primary) { setCard(primary); return; }
+      if (primary) {
+        setCard(primary);
+        return { card: primary, usedFallback: false };
+      }
       const fallbackData = fallback ? await tryFetch(fallback) : null;
-      if (!fallbackData) { setError('not-found'); return; }
+      if (!fallbackData) {
+        setError('not-found');
+        return null;
+      }
       setUsedFallback(true);
       setCard(fallbackData);
+      return { card: fallbackData, usedFallback: true };
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const selectCard = (selected: ArkhamCard, fallback: boolean) => {
+    setError(null);
+    setUsedFallback(fallback);
+    setCard(selected);
   };
 
   const reset = () => {
@@ -51,5 +70,5 @@ export function useArkhamDB(): UseArkhamDBReturn {
     setUsedFallback(false);
   };
 
-  return { card, isLoading, error, usedFallback, fetchCard, reset };
+  return { card, isLoading, error, usedFallback, fetchCard, selectCard, reset };
 }

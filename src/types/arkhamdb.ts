@@ -17,6 +17,10 @@ export interface ArkhamCard {
   back_flavor?: string | null;
 }
 
+export function cardDisplayName(card: ArkhamCard, side: Side): string {
+  return side === 'b' ? (card.back_name ?? card.name) : card.name;
+}
+
 export interface ArkhamPack {
   code: string;
   name: string;

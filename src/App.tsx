@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import type { ArkhamPack } from './types/arkhamdb';
-import { packPrefix, packCardOffset } from './types/arkhamdb';
+import { packPrefix, packCardOffset, cardDisplayName } from './types/arkhamdb';
 import type { Side } from './types/arkhamdb';
 import { usePacks } from './hooks/usePacks';
 import { useArkhamDB } from './hooks/useArkhamDB';
+import { useCardHistory } from './hooks/useCardHistory';
+import type { HistoryEntry } from './hooks/useCardHistory';
 import { PackSelector } from './components/PackSelector';
 import { ResultCard } from './components/ResultCard';
+import { HistoryList } from './components/HistoryList';
 
 const PACK_KEY = 'arkham-lens-pack';
 
@@ -23,7 +26,8 @@ function parseCardInput(cyclePrefix: string, raw: string, offset = 0): { code: s
 
 function App() {
   const { packs, isLoading: packsLoading } = usePacks();
-  const { card, fetchCard, reset: resetCard, error: cardError, usedFallback } = useArkhamDB();
+  const { card, fetchCard, selectCard, reset: resetCard, error: cardError, usedFallback } = useArkhamDB();
+  const { history, addEntry, removeEntry } = useCardHistory();
 
   const [selectedPack, setSelectedPack] = useState<ArkhamPack | null>(null);
   const [number, setNumber] = useState('');
@@ -70,8 +74,26 @@ function App() {
     resetCard();
     const primaryCode = parsed.side ? parsed.code + parsed.side : parsed.code;
     const fallbackCode = parsed.side ? parsed.code : parsed.code + 'a';
-    await fetchCard(primaryCode, fallbackCode);
+    const result = await fetchCard(primaryCode, fallbackCode);
     setFetching(false);
+
+    if (result) {
+      addEntry({
+        code: result.card.code,
+        number: number.trim(),
+        side: parsed.side,
+        name: cardDisplayName(result.card, parsed.side),
+        card: result.card,
+        usedFallback: result.usedFallback,
+      });
+    }
+  };
+
+  const handleHistorySelect = (entry: HistoryEntry) => {
+    selectCard(entry.card, entry.usedFallback);
+    setSelectedSide(entry.side);
+    setInputError(null);
+    addEntry(entry);
   };
 
   const dismiss = () => {
@@ -134,6 +156,8 @@ function App() {
             </button>
           </form>
         )}
+
+        <HistoryList history={history} onSelect={handleHistorySelect} onRemove={removeEntry} />
       </div>
 
       {card && <ResultCard card={card} side={selectedSide} isSidedFallback={usedFallback && !selectedSide} onDismiss={dismiss} />}

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { cardDisplayName } from '../types/arkhamdb';
 import type { ArkhamCard, Side } from '../types/arkhamdb';
 
 interface ResultCardProps {
@@ -13,7 +14,6 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
   const hasBack = card.double_sided && card.back_text;
   const showFront = !hasBack || side !== 'b';
   const showBack = !!hasBack && (side === 'b' || side === null);
-  const backName = card.back_name ?? card.name;
 
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [dragY, setDragY] = useState(0);
@@ -75,7 +75,7 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
         <div className="flex items-start justify-between gap-2 mb-3 mt-1">
           <div className="flex-1">
             <h2 className="font-serif text-xl text-arkham-cream leading-tight">
-              {side === 'b' ? backName : card.name}
+              {cardDisplayName(card, side)}
             </h2>
             <p className="text-xs text-arkham-gold font-sans mt-0.5">
               {card.type_name}
