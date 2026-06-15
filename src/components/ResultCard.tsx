@@ -43,7 +43,7 @@ export function ResultCard({ card, side, isSidedFallback, onDismiss }: ResultCar
   return (
     <>
     <div
-      className="absolute inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl card-texture border-t border-arkham-border shadow-2xl animate-slide-up overflow-hidden flex flex-col"
+      className="absolute inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl card-texture border-t border-arkham-border shadow-2xl animate-slide-up [clip-path:inset(0_round_1rem_1rem_0_0)] flex flex-col"
       role="dialog"
       aria-label={`Card: ${card.name}`}
       style={{

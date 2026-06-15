@@ -26,6 +26,7 @@ export function HistoryList({ history, onSelect, onRemove }: HistoryListProps) {
             >
               <span className="font-mono text-xs text-arkham-muted shrink-0">{entry.number}</span>
               <span className="truncate">{entry.name}</span>
+              <span className="text-xs text-arkham-gold shrink-0">{entry.card.type_name}</span>
             </button>
             <button
               onClick={() => onRemove(entry)}
